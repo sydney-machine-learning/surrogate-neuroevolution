@@ -197,6 +197,16 @@ class evolution(object):
 				count+=1
 		return 100*(count/pred.shape[0])
 
+	def classification_perf(self, x):
+		y = self.traindata[:, self.topology[0]]
+		fx, prob = self.neural_net.evaluate_proposal(self.traindata,x)
+		fit= self.rmse(fx,y) 
+		acc = self.accuracy(fx,y)
+		print(fx, ' fx')
+
+		return acc
+
+
 
  
 
@@ -438,7 +448,8 @@ class evolution(object):
 					self.best_index = x
 					tempfit  =  self.fitness[x]
 			if self.num_evals % 197 == 0:
-				#print(self.population[self.best_index])            
+				#print(self.population[self.best_index]) 
+				print(self.classification_perf(self.population[self.best_index]) , 'classification_perf' )         
 				print(self.fitness[self.best_index], ' fitness')
 				print(self.num_evals, 'num of evals\n\n\n')
 			np.savetxt(outfile, [ self.num_evals, self.best_index, self.best_fit], fmt='%1.5f', newline="\n")
@@ -450,7 +461,10 @@ class evolution(object):
 def main():
 
 
-	problem = 3
+	problem = 5
+
+
+	separate_flag = False # dont change 
 
 
 	if problem == 1: #Wine Quality White
@@ -492,6 +506,7 @@ def main():
 		hidden = 15 #50
 		ip = 34 #input
 		output = 2 
+
 		#NumSample = 50000
 	if problem == 5: #Cancer
 		traindata = np.genfromtxt('DATA/Cancer/ftrain.txt',delimiter=' ')[:,:-1]
@@ -574,8 +589,7 @@ def main():
 	max_evals = 10000
 	pop_size =  100
 	num_varibles = (netw[0] * netw[1]) + (netw[1] * netw[2]) + netw[1] + netw[2]  # num of weights and bias
-	max_limits = np.repeat(50, num_varibles)
-	print(max_limits, ' max_limits')
+	max_limits = np.repeat(50, num_varibles) 
 	min_limits = np.repeat(-50, num_varibles)
 
 
