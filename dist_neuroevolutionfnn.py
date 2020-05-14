@@ -8,7 +8,8 @@ import math
 import os
 import shutil
 
-
+import multiprocessing 
+import gc
   
 import copy    # array-copying convenience
 import sys     # max float
@@ -170,7 +171,7 @@ class neuralnetwork:
 
 
 
-class neuroevolution(object):  # class for fitness func 
+class evaluate_neuralnetwork(object):  # class for fitness func 
 	def __init__(self,  netw, traindata, testdata):
 
 
@@ -179,10 +180,7 @@ class neuroevolution(object):  # class for fitness func
 		self.traindata = traindata
 		self.testdata = testdata
 		self.topology = netw
- 
-		self.problem = 3
-
-
+  
 
 
 	def rmse(self, pred, actual):
@@ -211,21 +209,11 @@ class neuroevolution(object):  # class for fitness func
 
 		
 	def fit_func(self, x):    #  function  (can be any other function, model or diff neural network models (FNN or RNN ))
-		fit = 0.0
-		if self.problem == 1: # rosenbrock
-			for j in range(x.size -1):
-				fit += (100.0*(x[j]*x[j] - x[j+1])*(x[j]*x[j] - x[j+1]) + (x[j]-1.0)*(x[j]-1.0))
-		elif self.problem ==2:  # ellipsoidal - sphere function
-			for j in range(x.size):
-				fit = fit + ((j+1)*(x[j]*x[j]))
+		  
+		y = self.traindata[:, self.topology[0]]
+		fx, prob = self.neural_net.evaluate_proposal(self.traindata,x)
+		fit= self.rmse(fx,y) 
 
-		elif self.problem ==3:
-
-			y = self.traindata[:, self.topology[0]]
-			fx, prob = self.neural_net.evaluate_proposal(self.traindata,x)
-			fit= self.rmse(fx,y) 
-
-			#print(fit, ' is fit')
 
 		return fit # note we will maximize fitness, hence minimize error
 
@@ -245,36 +233,52 @@ class neuroevolution(object):  # class for fitness func
 
  
 
-class particle(neuroevolution):
+class particle(evaluate_neuralnetwork):
 	def __init__(self,  dim,  maxx, minx, netw, traindata, testdata):
-		super().__init__( netw, traindata, testdata) # inherits neuroevolution class definition and methods
+		evaluate_neuralnetwork.__init__( self, netw, traindata, testdata) # inherits neuroevolution class definition and methods
 
 		self.position = ((maxx - minx) * np.random.rand(dim)  + minx)
 		self.velocity = ((maxx - minx) * np.random.rand(dim)  + minx)
 
-		self.error = self.fit_func(self.position) # curr error
+		self.error =  self.fit_func(self.position) # curr error
 		self.best_part_pos =  self.position.copy()
 		self.best_part_err = self.error # best error 
 
 
 
-class evolutionPSO(neuroevolution):  #G3-PCX Evolutionary Alg by K Deb - 2002 
-	def __init__(self, pop_size, dimen, max_evals,  max_limits, min_limits, netw, traindata, testdata):
-		super().__init__( netw, traindata, testdata) # inherits neuroevolution class definition and methods
+class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO http://www.scholarpedia.org/article/Particle_swarm_optimization
+	def __init__(self, pop_size, dimen, max_evals,  max_limits, min_limits, netw, traindata, testdata, parameter_queue, wait_chain, event, island_id, swap_interval):
+		
+		multiprocessing.Process.__init__(self) # set up multiprocessing class
+
+		evaluate_neuralnetwork.__init__( self, netw, traindata, testdata) # sepossiesiont up - inherits neuroevolution class definition and methods
+
+		self.parameter_queue = parameter_queue
+		self.signal_main = wait_chain
+		self.event =  event
+
+
+		self.island_id = island_id
+
+
 
 		self.dim = dimen
 		self.n = pop_size
 		self.minx = min_limits
 		self.maxx = max_limits
-		self.max_epochs = max_evals
+		self.max_evals = max_evals
 
 		self.netw = netw
 		self.traindata = traindata
 		self.testdata = testdata
 
+		self.swap_interval = swap_interval
+
+		print('evoPSO initialized', island_id)
 
 
-	def evolvePSO(self):
+
+	def run(self): # this is executed without even calling - due to multi-processing
 
 
 		rnd = random.Random(0)
@@ -294,6 +298,7 @@ class evolutionPSO(neuroevolution):  #G3-PCX Evolutionary Alg by K Deb - 2002
 				best_swarm_pos = copy.copy(swarm[i].position) 
 			
 		epoch = 0
+		evals = 0
 		w = 0.729    # inertia
 		c1 = 1.49445 # cognitive (particle)
 		c2 = 1.49445 # social (swarm)
@@ -302,12 +307,18 @@ class evolutionPSO(neuroevolution):  #G3-PCX Evolutionary Alg by K Deb - 2002
 
 		depth = 1 # num of epochs for gradients by backprop
 
-		use_gradients = True
+		use_gradients = False
+
+
+		
+
+
+		self.event.clear()
 
 
 
 
-		while epoch < self.max_epochs:
+		while evals < self.max_evals:
 
 			
 			for i in range(self.n): # process each particle 
@@ -341,18 +352,34 @@ class evolutionPSO(neuroevolution):  #G3-PCX Evolutionary Alg by K Deb - 2002
 					best_swarm_err = swarm[i].error
 					best_swarm_pos = copy.copy(swarm[i].position)
 
-			if epoch % 10 == 0 and epoch > 1:
-				print("Epoch = " + str(epoch) + " best error = %.7f" % best_swarm_err)
+
+				#print(' **  ', i, evals, epoch, best_swarm_err, self.island_id)
+
+			if evals % self.n  == 0:
+				print(evals, epoch, best_swarm_err, self.island_id)
 
 				train_per, rmse_train = self.classification_perf(best_swarm_pos, 'train')
 				test_per, rmse_test = self.classification_perf(best_swarm_pos, 'test')
 
-				print(train_per , rmse_train,  'classification_perf RMSE train * pso' )   
-				print(test_per ,  rmse_test, 'classification_perf  RMSE test * pso' )
+				print(evals, epoch, train_per , rmse_train,  'classification_perf RMSE train * pso' )   
+				print(evals, epoch, test_per ,  rmse_test, 'classification_perf  RMSE test * pso' )
+
+
+
+			if (evals % self.swap_interval == 0 ): # interprocess (island) communication for exchange of neighbouring best_swarm_pos
+				param = best_swarm_pos
+				self.parameter_queue.put(param)
+				self.signal_main.set()
+				self.event.clear()
+				self.event.wait()
+				result =  self.parameter_queue.get()
+				#best_swarm_pos = result[0:self.num_param] 
+
 
 
 
 			epoch += 1
+			evals += self.n
  
 
 		train_per, rmse_train = self.classification_perf(best_swarm_pos, 'train')
@@ -360,10 +387,134 @@ class evolutionPSO(neuroevolution):  #G3-PCX Evolutionary Alg by K Deb - 2002
 
 		return train_per, test_per, rmse_train, rmse_test
 
+class distributed_neuroevo:
+
+	def __init__(self,  pop_size, dimen, max_evals,  max_limits, min_limits, netw, traindata, testdata, num_islands):
+		#FNN Chain variables
+		self.traindata = traindata
+		self.testdata = testdata
+		self.topology = netw 
+		self.pop_size = pop_size
+		self.num_param =  dimen
+		self.max_evals = max_evals
+		self.max_limits = max_limits
+		self.min_limits = min_limits
+
+		self.num_islands = num_islands
+
+		self.islands = [] 
+		self.island_numevals = int(self.max_evals/self.num_islands) 
+
+		# create queues for transfer of parameters between process islands running in parallel 
+		self.parameter_queue = [multiprocessing.Queue() for i in range(num_islands)]
+		self.island_queue = multiprocessing.JoinableQueue()	
+		self.wait_island = [multiprocessing.Event() for i in range (self.num_islands)]
+		self.event = [multiprocessing.Event() for i in range (self.num_islands)]
+
+
+		self.swap_interval = pop_size
+
+
+	def initialize_islands(self ):
+		
+		
+		for i in range(0, self.num_islands):
+			print(i, '   done initialize_islands')
+ 
+			self.islands.append(neuroevolution(  self.pop_size, self.num_param, self.island_numevals,  self.max_limits, self.min_limits, self.topology, self.traindata, self.testdata ,self.parameter_queue[i],self.wait_island[i],self.event[i], i, self.swap_interval))
+	
+	def swap_procedure(self, parameter_queue_1, parameter_queue_2): 
+
+
+			param1 = parameter_queue_1.get()
+			param2 = parameter_queue_2.get() 
+
+			swap_proposal = 0.5
+
+			u = np.random.uniform(0,1)
+
+			swapped = False
+			if u < swap_proposal:   
+				param_temp =  param1
+				param1 = param2
+				param2 = param_temp
+				swapped = True
+				print('will swap')
+			else:
+				swapped = False 
+			return param1, param2 ,swapped
+ 
+ 
+	def evolve_islands(self): 
+		# only adjacent chains can be swapped therefore, the number of proposals is ONE less islands
+
+		self.initialize_islands()
+
+
+		swap_proposal = np.ones(self.num_islands-1)
+ 
+		# create parameter holders for paramaters that will be swapped
+		replica_param = np.zeros((self.num_islands, self.num_param))  
+		lhood = np.zeros(self.num_islands)
+		# Define the starting and ending of MCMC Chains
+		start = 0
+		end = self.island_numevals
+		number_exchange = np.zeros(self.num_islands) 
+
+		#RUN MCMC CHAINS
+		for l in range(0,self.num_islands):
+			self.islands[l].start_chain = start
+			self.islands[l].end = end 
+
+		for j in range(0,self.num_islands):        
+			self.wait_island[j].clear()
+			self.event[j].clear()
+			self.islands[j].start()
+		#SWAP PROCEDURE
+
+		swaps_appected_main =0
+		total_swaps_main =0
+		for i in range(int(self.island_numevals/self.swap_interval)):
+			count = 0
+			for index in range(self.num_islands):
+				if not self.islands[index].is_alive():
+					count+=1
+					self.wait_island[index].set() 
+
+			if count == self.num_islands:
+				break 
+
+			timeout_count = 0
+			for index in range(0,self.num_islands): 
+				flag = self.wait_island[index].wait()
+				if flag: 
+					timeout_count += 1
+
+			if timeout_count != self.num_islands: 
+				continue 
+
+			for index in range(0,self.num_islands-1): 
+				param_1, param_2, swapped = self.swap_procedure(self.parameter_queue[index],self.parameter_queue[index+1])
+				self.parameter_queue[index].put(param_1)
+				self.parameter_queue[index+1].put(param_2)
+				if index == 0:
+					if swapped:
+						swaps_appected_main += 1
+					total_swaps_main += 1
+			for index in range (self.num_islands):
+					self.event[index].set()
+					self.wait_island[index].clear() 
+
+		for index in range(0,self.num_islands):
+			self.islands[index].join()
+		self.island_queue.join()
+		  
+
+		return   train_per, test_per, rmse_train, rmse_test
+
 
 
  
-
 
 
 def main():
@@ -489,8 +640,7 @@ def main():
 		y_test =  testdata[:,netw[0]]
 		y_train =  traindata[:,netw[0]]
 
-
-		outfile_ga=open('resultsga.txt','a+')
+ 
 		outfile_pso=open('resultspso.txt','a+')
 
 
@@ -502,14 +652,15 @@ def main():
 
 		for run in range(1, 2) :  
 
-			max_gens = 50
+			max_evals = 5000
 			pop_size =  100
+			num_islands = 10
 
 			timer = time.time()
 
-			psonn  =  evolutionPSO(pop_size, num_varibles, max_gens,  max_limits, min_limits, netw, traindata, testdata)
+			neuroevolution =  distributed_neuroevo(pop_size, num_varibles, max_evals,  max_limits, min_limits, netw, traindata, testdata, num_islands)
 
-			train_per, test_per, rmse_train, rmse_test = psonn.evolvePSO()
+			train_per, test_per, rmse_train, rmse_test = neuroevolution.evolve_islands()
 
 			print(train_per , rmse_train,  'classification_perf RMSE train * pso' )   
 			print(test_per ,  rmse_test, 'classification_perf  RMSE test * pso' )
