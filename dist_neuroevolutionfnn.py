@@ -307,7 +307,7 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 
 		depth = 1 # num of epochs for gradients by backprop
 
-		use_gradients = False
+		use_gradients = True
 
 
 		
@@ -355,14 +355,13 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 
 				#print(' **  ', i, evals, epoch, best_swarm_err, self.island_id)
 
-			if evals % self.n  == 0:
-				print(evals, epoch, best_swarm_err, self.island_id)
+			if evals % (self.n*5)  == 0: 
 
 				train_per, rmse_train = self.classification_perf(best_swarm_pos, 'train')
 				test_per, rmse_test = self.classification_perf(best_swarm_pos, 'test')
 
 				print(evals, epoch, train_per , rmse_train,  'classification_perf RMSE train * pso' )   
-				print(evals, epoch, test_per ,  rmse_test, 'classification_perf  RMSE test * pso' )
+				#print(evals, epoch, test_per ,  rmse_test, 'classification_perf  RMSE test * pso' )
 
 
 
@@ -373,7 +372,7 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 				self.event.clear()
 				self.event.wait()
 				result =  self.parameter_queue.get()
-				#best_swarm_pos = result[0:self.num_param] 
+				best_swarm_pos = result 
 
 
 
@@ -385,7 +384,13 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 		train_per, rmse_train = self.classification_perf(best_swarm_pos, 'train')
 		test_per, rmse_test = self.classification_perf(best_swarm_pos, 'test')
 
-		return train_per, test_per, rmse_train, rmse_test
+
+		print(evals, epoch, train_per , rmse_train,  'classification_perf RMSE train * pso' )   
+		print(evals, epoch, test_per ,  rmse_test, 'classification_perf  RMSE test * pso' )
+
+
+
+		#return train_per, test_per, rmse_train, rmse_test
 
 class distributed_neuroevo:
 
@@ -438,8 +443,7 @@ class distributed_neuroevo:
 				param_temp =  param1
 				param1 = param2
 				param2 = param_temp
-				swapped = True
-				print('will swap')
+				swapped = True 
 			else:
 				swapped = False 
 			return param1, param2 ,swapped
@@ -510,7 +514,7 @@ class distributed_neuroevo:
 		self.island_queue.join()
 		  
 
-		return   train_per, test_per, rmse_train, rmse_test
+		#return   train_per, test_per, rmse_train, rmse_test
 
 
 
@@ -652,7 +656,7 @@ def main():
 
 		for run in range(1, 2) :  
 
-			max_evals = 5000
+			max_evals = 20000
 			pop_size =  100
 			num_islands = 10
 
@@ -660,9 +664,12 @@ def main():
 
 			neuroevolution =  distributed_neuroevo(pop_size, num_varibles, max_evals,  max_limits, min_limits, netw, traindata, testdata, num_islands)
 
-			train_per, test_per, rmse_train, rmse_test = neuroevolution.evolve_islands()
 
-			print(train_per , rmse_train,  'classification_perf RMSE train * pso' )   
+			neuroevolution.evolve_islands()
+
+			#train_per, test_per, rmse_train, rmse_test = neuroevolution.evolve_islands()
+
+			'''print(train_per , rmse_train,  'classification_perf RMSE train * pso' )   
 			print(test_per ,  rmse_test, 'classification_perf  RMSE test * pso' )
 
 			timer2 = time.time()
@@ -671,7 +678,7 @@ def main():
 
 			allres =  np.asarray([ problem, run, train_per, test_per, rmse_train, rmse_test, timetotal]) 
 			np.savetxt(outfile_pso,  allres   , fmt='%1.4f', newline='   '  )
-			np.savetxt(outfile_pso,  ['  PSO'], fmt="%s", newline=' \n '  )
+			np.savetxt(outfile_pso,  ['  PSO'], fmt="%s", newline=' \n '  )'''
 
 
 	 
