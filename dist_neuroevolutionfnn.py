@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 np.set_printoptions(suppress=True)
 import random
+from random import seed
 import time
 import math
 import os
@@ -234,11 +235,22 @@ class evaluate_neuralnetwork(object):  # class for fitness func
  
 
 class particle(evaluate_neuralnetwork):
-	def __init__(self,  dim,  maxx, minx, netw, traindata, testdata):
+	def __init__(self,  dim,  maxx, minx, netw, traindata, testdata, id_island):
 		evaluate_neuralnetwork.__init__( self, netw, traindata, testdata) # inherits neuroevolution class definition and methods
 
-		self.position = ((maxx - minx) * np.random.rand(dim)  + minx)
-		self.velocity = ((maxx - minx) * np.random.rand(dim)  + minx)
+		#seed(id_island)
+
+
+ 
+		r_pos = np.asarray(random.sample(range(1, dim+1), dim) )/ (dim+1) #to force using random without np and convert to np (to avoid multiprocessing random seed issue)
+
+		np_pos = np.random.rand(dim)/2 + r_pos/2
+		np_vel = np.random.rand(dim)/2 + r_pos/2
+	 
+
+		self.position = ((maxx - minx) * np_pos  + minx) # using random.rand() rather than np.random.rand() to avoid multiprocesssing random issues
+		self.velocity = ((maxx - minx) * np_vel  + minx)
+
 
 		self.error =  self.fit_func(self.position) # curr error
 		self.best_part_pos =  self.position.copy()
@@ -273,8 +285,7 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 		self.testdata = testdata
 
 		self.swap_interval = swap_interval
-
-		print('evoPSO initialized', island_id)
+ 
 
 
 
@@ -282,9 +293,11 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 
 
 		rnd = random.Random(0)
-		# create n random particles 
+		# create n random particles
 
-		swarm = [particle(self.dim, self.minx, self.maxx,  self.netw, self.traindata, self.testdata) for i in range(self.n)] 
+		#random.seed(time.time()) 
+
+		swarm = [particle(self.dim, self.minx, self.maxx,  self.netw, self.traindata, self.testdata, self.island_id) for i in range(self.n)] 
 	 
 		best_swarm_pos = [0.0 for i in range(self.dim)] # not necess.
 		best_swarm_err = sys.float_info.max # swarm best
@@ -292,6 +305,9 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 
 	
 		for i in range(self.n): # check each particle
+
+
+			#print(swarm[i].position[0:4], self.island_id, i)
  
 			if swarm[i].error < best_swarm_err:
 				best_swarm_err = swarm[i].error
@@ -307,7 +323,7 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 
 		depth = 1 # num of epochs for gradients by backprop
 
-		use_gradients = True
+		use_gradients = False
 
 
 		
@@ -322,7 +338,10 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 
 			
 			for i in range(self.n): # process each particle 
-				r1 = np.random.rand(self.dim)
+
+				r_pos = np.asarray(random.sample(range(1, self.dim+1), self.dim) )/ (self.dim+1) #to force using random without np and convert to np (to avoid multiprocessing random seed issue)
+ 
+				r1 = np.random.rand(self.dim)#/2 + r_pos/2
 				r2 = np.random.rand(self.dim)
 
 				swarm[i].velocity = ( (w * swarm[i].velocity) + (c1 * r1 * (swarm[i].best_part_pos - swarm[i].position)) +  (c2 * r2 * (best_swarm_pos - swarm[i].position)) )  
@@ -355,12 +374,13 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 
 				#print(' **  ', i, evals, epoch, best_swarm_err, self.island_id)
 
-			if evals % (self.n*5)  == 0: 
+			if evals % (self.n*10)  == 0: 
 
 				train_per, rmse_train = self.classification_perf(best_swarm_pos, 'train')
 				test_per, rmse_test = self.classification_perf(best_swarm_pos, 'test')
 
-				print(evals, epoch, train_per , rmse_train,  'classification_perf RMSE train * pso' )   
+				print(evals, epoch, train_per , rmse_train,  'classification_perf RMSE train * pso' ) 
+				
 				#print(evals, epoch, test_per ,  rmse_test, 'classification_perf  RMSE test * pso' )
 
 
@@ -373,6 +393,7 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 				self.event.wait()
 				result =  self.parameter_queue.get()
 				best_swarm_pos = result 
+				swarm[0].position = best_swarm_pos.copy()
 
 
 
@@ -385,8 +406,11 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 		test_per, rmse_test = self.classification_perf(best_swarm_pos, 'test')
 
 
-		print(evals, epoch, train_per , rmse_train,  'classification_perf RMSE train * pso' )   
-		print(evals, epoch, test_per ,  rmse_test, 'classification_perf  RMSE test * pso' )
+		#print(evals, epoch, train_per , rmse_train,  'classification_perf RMSE train * pso' )   
+		#print(evals, epoch, test_per ,  rmse_test, 'classification_perf  RMSE test * pso' )
+
+		file_name = 'island_results/island_'+ str(self.island_id)+ '.txt'
+		np.savetxt(file_name, [train_per, rmse_train, test_per, rmse_test], fmt='%1.4f')   
 
 
 
@@ -423,8 +447,7 @@ class distributed_neuroevo:
 	def initialize_islands(self ):
 		
 		
-		for i in range(0, self.num_islands):
-			print(i, '   done initialize_islands')
+		for i in range(0, self.num_islands): 
  
 			self.islands.append(neuroevolution(  self.pop_size, self.num_param, self.island_numevals,  self.max_limits, self.min_limits, self.topology, self.traindata, self.testdata ,self.parameter_queue[i],self.wait_island[i],self.event[i], i, self.swap_interval))
 	
@@ -512,13 +535,41 @@ class distributed_neuroevo:
 		for index in range(0,self.num_islands):
 			self.islands[index].join()
 		self.island_queue.join()
-		  
-
-		#return   train_per, test_per, rmse_train, rmse_test
 
 
+		train_per, test_per, rmse_train, rmse_test = self.get_results()
 
- 
+
+
+
+
+
+		return   train_per, test_per, rmse_train, rmse_test
+
+
+
+
+
+
+
+
+
+	def get_results(self):
+
+		res_collect = np.zeros((self.num_islands,4))
+		
+		 
+		for i in range(self.num_islands):
+			file_name = 'island_results/island_'+ str(i)+ '.txt'
+			dat = np.loadtxt(file_name)
+			res_collect[i,:] = dat 
+
+		print(res_collect, ' res_collect')
+
+		return   train_per, test_per, rmse_train, rmse_test
+
+
+
 
 
 def main():
@@ -528,7 +579,7 @@ def main():
 
 	method = 'pso'    # or 'rcga'
 
-	for problem in range(5, 9) : 
+	for problem in range(4, 6) : 
 
 
 		separate_flag = False # dont change 
