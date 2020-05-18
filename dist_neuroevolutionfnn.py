@@ -215,8 +215,11 @@ class evaluate_neuralnetwork(object):  # class for fitness func
 		fx, prob = self.neural_net.evaluate_proposal(self.traindata,x)
 		fit= self.rmse(fx,y) 
 
+		acc = self.accuracy(fx,y) 
 
-		return fit # note we will maximize fitness, hence minimize error
+
+
+		return 1/(acc+1)#fit # note we will maximize fitness, hence minimize error
 
 
 
@@ -319,11 +322,10 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 		c1 = 1.49445 # cognitive (particle)
 		c2 = 1.49445 # social (swarm)
 
-		gradient_prob =0.5
+		gradient_prob =0.1
 
-		depth = 1 # num of epochs for gradients by backprop
 
-		use_gradients = False
+		use_gradients = True
 
 
 		
@@ -341,7 +343,7 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 
 				r_pos = np.asarray(random.sample(range(1, self.dim+1), self.dim) )/ (self.dim+1) #to force using random without np and convert to np (to avoid multiprocessing random seed issue)
  
-				r1 = np.random.rand(self.dim)#/2 + r_pos/2
+				r1 = np.random.rand(self.dim)/2 + r_pos/2
 				r2 = np.random.rand(self.dim)
 
 				swarm[i].velocity = ( (w * swarm[i].velocity) + (c1 * r1 * (swarm[i].best_part_pos - swarm[i].position)) +  (c2 * r2 * (best_swarm_pos - swarm[i].position)) )  
@@ -355,6 +357,7 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 				swarm[i].position += swarm[i].velocity
 
 				u = random.uniform(0, 1)
+				depth = random.randint(1, 5)# num of epochs for gradients by backprop
 
 				if u < gradient_prob and use_gradients == True: 
 
@@ -374,7 +377,7 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 
 				#print(' **  ', i, evals, epoch, best_swarm_err, self.island_id)
 
-			if evals % (self.n*10)  == 0: 
+			if evals % (self.n*2)  == 0: 
 
 				train_per, rmse_train = self.classification_perf(best_swarm_pos, 'train')
 				test_per, rmse_test = self.classification_perf(best_swarm_pos, 'test')
@@ -537,14 +540,16 @@ class distributed_neuroevo:
 		self.island_queue.join()
 
 
-		train_per, test_per, rmse_train, rmse_test = self.get_results()
+		train_per, test_per, rmse_train, rmse_test, train_per_std, test_per_std, rmse_train_std, rmse_test_std = self.get_results()
 
 
 
 
 
 
-		return   train_per, test_per, rmse_train, rmse_test
+		return   train_per, test_per, rmse_train, rmse_test, train_per_std, test_per_std, rmse_train_std, rmse_test_std
+
+
 
 
 
@@ -566,7 +571,25 @@ class distributed_neuroevo:
 
 		print(res_collect, ' res_collect')
 
-		return   train_per, test_per, rmse_train, rmse_test
+		train_per = np.mean(res_collect[:,0])
+		train_per_std = np.std(res_collect[:,0])
+
+		rmse_train = np.mean(res_collect[:,1])
+		rmse_train_std = np.std(res_collect[:,1])
+
+		test_per = np.mean(res_collect[:,2])
+		test_per_std = np.std(res_collect[:,2])
+
+		rmse_test = np.mean(res_collect[:,3])
+		rmse_test_std = np.std(res_collect[:,3])
+		
+		
+		
+
+
+
+
+		return   train_per, test_per, rmse_train, rmse_test, train_per_std, test_per_std, rmse_train_std, rmse_test_std
 
 
 
@@ -579,7 +602,7 @@ def main():
 
 	method = 'pso'    # or 'rcga'
 
-	for problem in range(4, 6) : 
+	for problem in range(3, 9) : 
 
 
 		separate_flag = False # dont change 
@@ -595,6 +618,7 @@ def main():
 			hidden = 50
 			ip = 11 #input
 			output = 10 
+			max_evals = 50000
 		if problem == 3: #IRIS
 			data  = np.genfromtxt('DATA/iris.csv',delimiter=';')
 			classes = data[:,4].reshape(data.shape[0],1)-1
@@ -605,7 +629,7 @@ def main():
 			hidden = 8  #12
 			ip = 4 #input
 			output = 3 
-			#NumSample = 50000
+			max_evals = 20000
 		if problem == 2: #Wine Quality White
 			data  = np.genfromtxt('DATA/winequality-white.csv',delimiter=';')
 			data = data[1:,:] #remove Labels
@@ -616,7 +640,7 @@ def main():
 			hidden = 50
 			ip = 11 #input
 			output = 10 
-			#NumSample = 50000
+			max_evals = 50000
 		if problem == 4: #Ionosphere
 			traindata = np.genfromtxt('DATA/Ions/Ions/ftrain.csv',delimiter=',')[:,:-1]
 			testdata = np.genfromtxt('DATA/Ions/Ions/ftest.csv',delimiter=',')[:,:-1]
@@ -624,6 +648,7 @@ def main():
 			hidden = 15 #50
 			ip = 34 #input
 			output = 2 
+			max_evals = 50000
 
 			#NumSample = 50000
 		if problem == 5: #Cancer
@@ -633,20 +658,22 @@ def main():
 			hidden = 8 # 12
 			ip = 9 #input
 			output = 2 
-			#NumSample =  50000
+			max_evals = 20000
 
 			# print(' cancer')
 
 		if problem == 6: #Bank additional
 			data = np.genfromtxt('DATA/Bank/bank-processed.csv',delimiter=';')
-			classes = data[:,20].reshape(data.shape[0],1)
-			features = data[:,0:20]
+			#classes = data[:,20].reshape(data.shape[0],1)
+			#features = data[:,0:20]
+			classes = data[:,51].reshape(data.shape[0],1)
+			features = data[:,0:51]
 			separate_flag = True
 			name = "bank-additional"
-			hidden = 50
-			ip = 20 #input
+			hidden = 90# 50
+			ip = 51# 20 #input
 			output = 2 
-			#NumSample = 50000
+			max_evals = 50000
 		if problem == 7: #PenDigit
 			traindata = np.genfromtxt('DATA/PenDigit/train.csv',delimiter=',')
 			testdata = np.genfromtxt('DATA/PenDigit/test.csv',delimiter=',')
@@ -661,8 +688,7 @@ def main():
 			ip = 16
 			hidden = 30
 			output = 10 
-
-			#NumSample = 50000
+			max_evals = 50000
 		if problem == 8: #Chess
 			data  = np.genfromtxt('DATA/chess.csv',delimiter=';')
 			classes = data[:,6].reshape(data.shape[0],1)
@@ -672,7 +698,7 @@ def main():
 			hidden = 25
 			ip = 6 #input
 			output = 18 
-
+			max_evals = 50000
 
 		
 		#Separating data to train and test
@@ -696,7 +722,7 @@ def main():
 		y_train =  traindata[:,netw[0]]
 
  
-		outfile_pso=open('resultspso.txt','a+')
+		outfile_pso=open('results.txt','a+')
 
 
 		num_varibles = (netw[0] * netw[1]) + (netw[1] * netw[2]) + netw[1] + netw[2]  # num of weights and bias
@@ -707,7 +733,7 @@ def main():
 
 		for run in range(1, 2) :  
 
-			max_evals = 20000
+			#max_evals = 50000
 			pop_size =  100
 			num_islands = 10
 
@@ -716,20 +742,19 @@ def main():
 			neuroevolution =  distributed_neuroevo(pop_size, num_varibles, max_evals,  max_limits, min_limits, netw, traindata, testdata, num_islands)
 
 
-			neuroevolution.evolve_islands()
+			train_per, test_per, rmse_train, rmse_test, train_per_std, test_per_std, rmse_train_std, rmse_test_std = neuroevolution.evolve_islands()
+ 
 
-			#train_per, test_per, rmse_train, rmse_test = neuroevolution.evolve_islands()
-
-			'''print(train_per , rmse_train,  'classification_perf RMSE train * pso' )   
+			print(train_per , rmse_train,  'classification_perf RMSE train * pso' )   
 			print(test_per ,  rmse_test, 'classification_perf  RMSE test * pso' )
 
 			timer2 = time.time()
 			timetotal = (timer2 - timer) /60
 
 
-			allres =  np.asarray([ problem, run, train_per, test_per, rmse_train, rmse_test, timetotal]) 
+			allres =  np.asarray([ problem, run, train_per, test_per, train_per_std, test_per_std, timetotal]) 
 			np.savetxt(outfile_pso,  allres   , fmt='%1.4f', newline='   '  )
-			np.savetxt(outfile_pso,  ['  PSO'], fmt="%s", newline=' \n '  )'''
+			np.savetxt(outfile_pso,  ['  PSO'], fmt="%s", newline=' \n '  )
 
 
 	 
