@@ -54,7 +54,7 @@ class neuralnetwork:
 		self.pred_class = np.argmax(self.out)
 
 
-		## print(self.pred_class, self.out, '  ---------------- out ')
+		#print(self.pred_class, self.out, '  ---------------- out ')
 
 	'''def BackwardPass(self, Input, desired):
 		out_delta = (desired - self.out).dot(self.out.dot(1 - self.out))
@@ -70,7 +70,14 @@ class neuralnetwork:
 
 	def BackwardPass(self, Input, desired): # since data outputs and number of output neuons have different orgnisation
 		onehot = np.zeros((desired.size, self.Top[2]))
+
+
+		print(onehot, ' bp -')
+
+
 		onehot[np.arange(desired.size),int(desired)] = 1
+
+		print(onehot, ' bp')
 		desired = onehot
 		out_delta = (desired - self.out)*(self.out*(1 - self.out))
 		hid_delta = np.dot(out_delta,self.W2.T) * (self.hidout * (1 - self.hidout))
@@ -602,23 +609,31 @@ def main():
 
 	method = 'pso'    # or 'rcga'
 
-	for problem in range(3, 9) : 
+	for problem in range(2, 6) : 
 
 
 		separate_flag = False # dont change 
 
+		if problem == 1: #6 bit party 
+			traindata  = np.genfromtxt('DATA/nbitParity/data6bits_.txt',delimiter=' ')
+			testdata = traindata
+	 
+			name = "6bitparity"
+			hidden = 10   
+			ip = 6  
+			output = 2
+			max_evals = 200 
 
-		if problem == 1: #Wine Quality White
-			data  = np.genfromtxt('DATA/winequality-red.csv',delimiter=';')
-			data = data[1:,:] #remove Labels
-			classes = data[:,11].reshape(data.shape[0],1)
-			features = data[:,0:11]
-			separate_flag = True
-			name = "winequality-red"
-			hidden = 50
-			ip = 11 #input
-			output = 10 
-			max_evals = 50000
+		if problem == 2: #8 bit parity 
+			traindata  = np.genfromtxt('DATA/nbitParity/data8bits_.txt',delimiter=' ')
+			testdata = traindata
+	
+			name = "8bitparity"
+			hidden = 20   
+			ip = 8 
+			output = 2
+			max_evals = 100000
+
 		if problem == 3: #IRIS
 			data  = np.genfromtxt('DATA/iris.csv',delimiter=';')
 			classes = data[:,4].reshape(data.shape[0],1)-1
@@ -630,17 +645,6 @@ def main():
 			ip = 4 #input
 			output = 3 
 			max_evals = 20000
-		if problem == 2: #Wine Quality White
-			data  = np.genfromtxt('DATA/winequality-white.csv',delimiter=';')
-			data = data[1:,:] #remove Labels
-			classes = data[:,11].reshape(data.shape[0],1)
-			features = data[:,0:11]
-			separate_flag = True
-			name = "winequality-white"
-			hidden = 50
-			ip = 11 #input
-			output = 10 
-			max_evals = 50000
 		if problem == 4: #Ionosphere
 			traindata = np.genfromtxt('DATA/Ions/Ions/ftrain.csv',delimiter=',')[:,:-1]
 			testdata = np.genfromtxt('DATA/Ions/Ions/ftest.csv',delimiter=',')[:,:-1]
@@ -658,7 +662,7 @@ def main():
 			hidden = 8 # 12
 			ip = 9 #input
 			output = 2 
-			max_evals = 20000
+			max_evals = 200 
 
 			# print(' cancer')
 
@@ -700,6 +704,34 @@ def main():
 			output = 18 
 			max_evals = 50000
 
+
+
+
+		if problem == 11: #Wine Quality White
+			data  = np.genfromtxt('DATA/winequality-red.csv',delimiter=';')
+			data = data[1:,:] #remove Labels
+			classes = data[:,11].reshape(data.shape[0],1)
+			features = data[:,0:11]
+			separate_flag = True
+			name = "winequality-red"
+			hidden = 50
+			ip = 11 #input
+			output = 10 
+			max_evals = 50000
+
+
+		if problem == 12: #Wine Quality White
+			data  = np.genfromtxt('DATA/winequality-white.csv',delimiter=';')
+			data = data[1:,:] #remove Labels
+			classes = data[:,11].reshape(data.shape[0],1)
+			features = data[:,0:11]
+			separate_flag = True
+			name = "winequality-white"
+			hidden = 50
+			ip = 11 #input
+			output = 10 
+			max_evals = 50000
+
 		
 		#Separating data to train and test
 		if separate_flag is True:
@@ -729,13 +761,15 @@ def main():
 		max_limits = np.repeat(50, num_varibles) 
 		min_limits = np.repeat(-50, num_varibles)
 
+		print(traindata)
+
 
 
 		for run in range(1, 2) :  
 
 			#max_evals = 50000
 			pop_size =  100
-			num_islands = 10
+			num_islands = 2
 
 			timer = time.time()
 
