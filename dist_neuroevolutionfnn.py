@@ -69,16 +69,18 @@ class neuralnetwork:
 
 
 	def BackwardPass(self, Input, desired): # since data outputs and number of output neuons have different orgnisation
-		onehot = np.zeros((desired.size, self.Top[2]))
+
+		#print(Input, desired, '  ** ss')
+		#onehot = np.zeros((desired.size, self.Top[2]))
 
 
-		print(onehot, ' bp -')
+		#print(onehot, ' bp -')
 
 
-		onehot[np.arange(desired.size),int(desired)] = 1
+		#onehot[np.arange(desired.size),int(desired)] = 1
 
-		print(onehot, ' bp')
-		desired = onehot
+		#print(onehot, ' bp')
+		#desired = onehot
 		out_delta = (desired - self.out)*(self.out*(1 - self.out))
 		hid_delta = np.dot(out_delta,self.W2.T) * (self.hidout * (1 - self.hidout))
 		self.W2 += np.dot(self.hidout.T,(out_delta * self.lrate))
@@ -122,8 +124,9 @@ class neuralnetwork:
 		self.decode(w)  # method to decode w into W1, W2, B1, B2.
 		size = data.shape[0]
 
-		Input = np.zeros((1, self.Top[0]))  # temp hold input
-		Desired = np.zeros((1, self.Top[2]))
+		#Input = np.zeros((1, self.Top[0]))  # temp hold input
+		#Desired = np.zeros((1, self.Top[2]))
+
 		fx = np.zeros(size)
 
 		for i in range(0, depth):
@@ -131,6 +134,7 @@ class neuralnetwork:
 				pat = i
 				Input = data[pat, 0:self.Top[0]]
 				Desired = data[pat, self.Top[0]:]
+				#print(Desired, i,  '  desired ')
 				self.ForwardPass(Input)
 				self.BackwardPass(Input, Desired)
 		w_updated = self.encode()
@@ -144,6 +148,7 @@ class neuralnetwork:
 
 		Input = np.zeros((1, self.Top[0]))  # temp hold input
 		Desired = np.zeros((1, self.Top[2]))
+		#print(Desired, ' desired')
 		fx = np.zeros(size)
 		prob = np.zeros((size,self.Top[2]))
 
@@ -609,20 +614,30 @@ def main():
 
 	method = 'pso'    # or 'rcga'
 
-	for problem in range(2, 6) : 
+	for problem in range(1, 9) : 
 
 
 		separate_flag = False # dont change 
+
+		if problem == 0: #4 bit party 
+			traindata  = np.genfromtxt('DATA/nbitParity/data4bits_.txt',delimiter=' ')
+			testdata = traindata
+	 
+			name = "6bitparity"
+			hidden = 8
+			ip = 4
+			output = 2
+			max_evals = 100000
 
 		if problem == 1: #6 bit party 
 			traindata  = np.genfromtxt('DATA/nbitParity/data6bits_.txt',delimiter=' ')
 			testdata = traindata
 	 
 			name = "6bitparity"
-			hidden = 10   
+			hidden = 12  
 			ip = 6  
 			output = 2
-			max_evals = 200 
+			max_evals = 100000  
 
 		if problem == 2: #8 bit parity 
 			traindata  = np.genfromtxt('DATA/nbitParity/data8bits_.txt',delimiter=' ')
@@ -632,7 +647,7 @@ def main():
 			hidden = 20   
 			ip = 8 
 			output = 2
-			max_evals = 100000
+			max_evals = 200000
 
 		if problem == 3: #IRIS
 			data  = np.genfromtxt('DATA/iris.csv',delimiter=';')
@@ -644,7 +659,7 @@ def main():
 			hidden = 8  #12
 			ip = 4 #input
 			output = 3 
-			max_evals = 20000
+			max_evals = 20000  
 		if problem == 4: #Ionosphere
 			traindata = np.genfromtxt('DATA/Ions/Ions/ftrain.csv',delimiter=',')[:,:-1]
 			testdata = np.genfromtxt('DATA/Ions/Ions/ftest.csv',delimiter=',')[:,:-1]
@@ -652,7 +667,7 @@ def main():
 			hidden = 15 #50
 			ip = 34 #input
 			output = 2 
-			max_evals = 50000
+			max_evals = 30000
 
 			#NumSample = 50000
 		if problem == 5: #Cancer
@@ -662,7 +677,7 @@ def main():
 			hidden = 8 # 12
 			ip = 9 #input
 			output = 2 
-			max_evals = 200 
+			max_evals = 20000
 
 			# print(' cancer')
 
@@ -753,6 +768,8 @@ def main():
 		y_test =  testdata[:,netw[0]]
 		y_train =  traindata[:,netw[0]]
 
+		print(y_train)
+
  
 		outfile_pso=open('results.txt','a+')
 
@@ -766,10 +783,9 @@ def main():
 
 
 		for run in range(1, 2) :  
-
-			#max_evals = 50000
+ 
 			pop_size =  100
-			num_islands = 2
+			num_islands = 10
 
 			timer = time.time()
 

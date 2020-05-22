@@ -5,7 +5,7 @@ import math
 import numpy as np 
 
 
-bits = 12
+bits = 6
 
 data = np.genfromtxt('input/data'+str(bits)+'bits.txt',delimiter=',') # change this as needed
 
