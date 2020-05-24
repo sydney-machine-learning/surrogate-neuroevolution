@@ -360,11 +360,11 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 
 				swarm[i].velocity = ( (w * swarm[i].velocity) + (c1 * r1 * (swarm[i].best_part_pos - swarm[i].position)) +  (c2 * r2 * (best_swarm_pos - swarm[i].position)) )  
 
-				for k in range(self.dim): 
+				'''for k in range(self.dim): 
 					if swarm[i].velocity[k] < self.minx[k]:
 						swarm[i].velocity[k] = self.minx[k]
 					elif swarm[i].velocity[k] > self.maxx[k]:
-						swarm[i].velocity[k] = self.maxx[k]
+						swarm[i].velocity[k] = self.maxx[k]'''
  
 				swarm[i].position += swarm[i].velocity
 
