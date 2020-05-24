@@ -257,10 +257,10 @@ class particle(evaluate_neuralnetwork):
 
 
  
-		r_pos = np.asarray(random.sample(range(1, dim+1), dim) )/ (dim+1) #to force using random without np and convert to np (to avoid multiprocessing random seed issue)
+		#r_pos = np.asarray(random.sample(range(1, dim+1), dim) )/ (dim+1) #to force using random without np and convert to np (to avoid multiprocessing random seed issue)
 
-		np_pos = np.random.rand(dim)/2 + r_pos/2
-		np_vel = np.random.rand(dim)/2 + r_pos/2
+		np_pos = np.random.rand(dim)#/2 + r_pos/2
+		np_vel = np.random.rand(dim)#/2 + r_pos/2
 	 
 
 		self.position = ((maxx - minx) * np_pos  + minx) # using random.rand() rather than np.random.rand() to avoid multiprocesssing random issues
@@ -306,11 +306,9 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 
 	def run(self): # this is executed without even calling - due to multi-processing
 
+ 
 
-		rnd = random.Random(0)
-		# create n random particles
-
-		#random.seed(time.time()) 
+		np.random.seed(int(self.island_id) )
 
 		swarm = [particle(self.dim, self.minx, self.maxx,  self.netw, self.traindata, self.testdata, self.island_id) for i in range(self.n)] 
 	 
@@ -353,9 +351,9 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 			
 			for i in range(self.n): # process each particle 
 
-				r_pos = np.asarray(random.sample(range(1, self.dim+1), self.dim) )/ (self.dim+1) #to force using random without np and convert to np (to avoid multiprocessing random seed issue)
+				#r_pos = np.asarray(random.sample(range(1, self.dim+1), self.dim) )/ (self.dim+1) #to force using random without np and convert to np (to avoid multiprocessing random seed issue)
  
-				r1 = np.random.rand(self.dim)/2 + r_pos/2
+				r1 = np.random.rand(self.dim)#/2 + r_pos/2
 				r2 = np.random.rand(self.dim)
 
 				swarm[i].velocity = ( (w * swarm[i].velocity) + (c1 * r1 * (swarm[i].best_part_pos - swarm[i].position)) +  (c2 * r2 * (best_swarm_pos - swarm[i].position)) )  
