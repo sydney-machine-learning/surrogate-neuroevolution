@@ -612,7 +612,7 @@ def main():
 
 	method = 'pso'    # or 'rcga'
 
-	for problem in range(1, 9) : 
+	for problem in range(0, 9) : 
 
 
 		separate_flag = False # dont change 
