@@ -38,8 +38,8 @@ class neuralnetwork:
 
     def sigmoid(self, x):
         #x = np.float128(x)#to avoid overflow
-        return .5 * (1 + np.tanh(.5 * x))
-        #return 1 / (1 + np.exp(-x))
+        #return .5 * (1 + np.tanh(.5 * x))
+        return 1 / (1 + np.exp(-x))
 
     def sampleEr(self, actualout):
         error = np.subtract(self.out, actualout)
@@ -557,6 +557,10 @@ class distributed_neuroevo:
         if self.meth == 'DE':
             for i in range(0, self.num_islands): 
                 self.islands.append(neuroevolution_de(  self.pop_size,self.num_param, self.island_numevals,self.max_limits,self.min_limits, self.topology, self.traindata, self.testdata ,self.parameter_queue[i],self.wait_island[i],self.event[i], i, self.swap_interval))
+        ## for the G3-PCX part
+        if self.meth == 'G3PCX':
+            for i in range(0, self.num_islands): 
+                self.islands.append(neuroevolution_G3PCX(  self.pop_size,self.num_param, self.island_numevals,self.max_limits,self.min_limits, self.topology, self.traindata, self.testdata ,self.parameter_queue[i],self.wait_island[i],self.event[i], i, self.swap_interval))
         
         
     def swap_procedure(self, parameter_queue_1, parameter_queue_2): 
@@ -565,7 +569,7 @@ class distributed_neuroevo:
             param1 = parameter_queue_1.get()
             param2 = parameter_queue_2.get() 
 
-            swap_proposal = 0
+            swap_proposal = 0.5
 
             u = np.random.uniform(0,1)
 
@@ -698,7 +702,7 @@ def main():
     problem = 3
     print("Starting to run....")
 
-    method = 'DE'    # or 'rcga'#or 'de' or 'cma-es'
+    method = 'G3PCX' # or 'PSO' or 'DE'    
 
     for problem in range(0, 9) :
          
@@ -870,7 +874,7 @@ def main():
         for run in range(1, 4) :  
  
             pop_size =  100
-            num_islands = 2 # currently testing on 10 islands using multiprocessing.
+            num_islands = 10 # currently testing on 10 islands using multiprocessing.
 
             timer = time.time()
             neuroevolution =  distributed_neuroevo(pop_size, num_varibles, max_evals,  max_limits, min_limits, netw, traindata, testdata, num_islands,method)
@@ -885,7 +889,7 @@ def main():
 
             allres =  np.asarray([ problem, run, train_per, test_per, train_per_std, test_per_std, timetotal]) 
             np.savetxt(outfile_pso,  allres   , fmt='%1.4f', newline='   '  )
-            np.savetxt(outfile_pso,  ['  DE'], fmt="%s", newline=' \n '  )
+            np.savetxt(outfile_pso,  ['  G3PCX'], fmt="%s", newline=' \n '  )
 
 
      
