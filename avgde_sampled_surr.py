@@ -550,6 +550,8 @@ class neuroevolution_de(evaluate_neuralnetwork, multiprocessing.Process):  # PSO
                 surrogate_Y = np.array([best_f])
 
                 ku = random.uniform(0,1)
+                ## Uncomment below for scheduled surrogate usage
+                #self.surrogate_prob = 0.5 + epoch/(2*(self.max_evals/self.n))
                 if ku<self.surrogate_prob and evals >= self.surrogate_interval+1:
                     is_true_fit = False
 
