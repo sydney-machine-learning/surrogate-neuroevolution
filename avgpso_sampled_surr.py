@@ -640,17 +640,10 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
                             swarm[i].best_part_err = actual_err
                             swarm[i].best_part_pos = copy.copy(swarm[i].position)
                     
-
-                if swarm[i].error < best_swarm_err:
-                    if is_true_fit == True:
-                        best_swarm_err = swarm[i].error
-                        best_swarm_pos = copy.copy(swarm[i].position) 
-
-                    else:
-                        actual_err = self.fit_func(swarm[i].position)
-                        if actual_err < best_swarm_err:
-                            best_swarm_err = swarm[i].error
-                            best_swarm_pos = copy.copy(swarm[i].position)
+                    if swarm[i].best_part_err < best_swarm_err:
+                        best_swarm_err = swarm[i].best_part_err
+                        best_swarm_pos = copy.copy(swarm[i].position)
+               
                       
 
                 index_list[i] += 1    
