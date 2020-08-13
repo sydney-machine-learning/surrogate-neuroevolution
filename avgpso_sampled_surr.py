@@ -511,7 +511,7 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
 
                 u = random.uniform(0, 1)
                 depth = random.randint(1, 5)# num of epochs for gradients by backprop
-
+                swarm[i].position += np.random.normal(0.0,2,self.num_param)
                 if u < gradient_prob and use_gradients == True: 
 
                     swarm[i].position = self.neuro_gradient(self.traindata, swarm[i].position.copy(), depth)  
@@ -594,7 +594,7 @@ class neuroevolution(evaluate_neuralnetwork, multiprocessing.Process):  # PSO ht
                         surrogate_pred,  nn_predict = surrogate_model.predict(w_proposal.reshape(1,w_proposal.shape[0]), True)
                         #print("ENTERED CONDITION 3")
                         #surrogate_likelihood = surrogate_likelihood *(1.0/self.adapttemp)
-                    surr_mov_ave = ((surg_fit_list[i])[index_list[i],2] + (surg_fit_list[i])[index_list[i] - 1,2]+ (surg_fit_list[i])[index_list[i] - 3,2])/3
+                    surr_mov_ave = ((surg_fit_list[i])[index_list[i],2] + (surg_fit_list[i])[index_list[i] - 1,2]+ (surg_fit_list[i])[index_list[i] - 2,2])/3
                     surr_proposal = (surrogate_pred * 0.5) + (  surr_mov_ave * 0.5)
                     #surr_proposal = surrogate_pred
                     
