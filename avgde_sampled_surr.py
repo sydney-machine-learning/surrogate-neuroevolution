@@ -571,7 +571,7 @@ class neuroevolution_de(evaluate_neuralnetwork, multiprocessing.Process):  # PSO
                     else:
                         surrogate_pred,  nn_predict = surrogate_model.predict(w_proposal.reshape(1,w_proposal.shape[0]), True)
                         #surrogate_likelihood = surrogate_likelihood *(1.0/self.adapttemp)
-                    surr_mov_ave = ((surg_fit_list[i])[index_list[i],2] + (surg_fit_list[i])[index_list[i] - 1,2]+ (surg_fit_list[i])[index_list[i] - 3,2])/3
+                    surr_mov_ave = ((surg_fit_list[i])[index_list[i],2] + (surg_fit_list[i])[index_list[i] - 1,2]+ (surg_fit_list[i])[index_list[i] - 2,2])/3
                     surr_proposal = (surrogate_pred * 0.5) + (  surr_mov_ave * 0.5)
                     #surr_proposal = surrogate_pred
 
