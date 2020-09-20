@@ -34,7 +34,7 @@ def define_model(optim = 'adam'):
   model.add(Activation('relu'))
   model.add(Dense(10, activation='softmax'))
   if(optim =='sgd'):
-    opt = SGD(lr=0.01, momentum=0.9)
+    opt = SGD(lr=0.01)
   else:
     opt = Adam(learning_rate=0.001)  
   model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
