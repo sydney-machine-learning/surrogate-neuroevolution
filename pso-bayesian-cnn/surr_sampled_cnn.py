@@ -77,7 +77,6 @@ class Model(nn.Module):
         x = torch.flatten(x, 1)
         x = F.relu(x)
         x = self.fc1(x)
-        x = self.softmax(x)
         return x
 
     # Used to apply softmax and obtain loss value
@@ -95,8 +94,8 @@ class Model(nn.Module):
             _, predicted = torch.max(a.data, 1)
             y_pred[i] = predicted
             b = copy.deepcopy(a)
-            prob[i] = b
-            loss = self.criterion(a, labels)
+            prob[i] = self.softmax(b)
+            loss = self.criterion(self.softmax(b), labels)
             self.los += loss
         
         return y_pred, prob
