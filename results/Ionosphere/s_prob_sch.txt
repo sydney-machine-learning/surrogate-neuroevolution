@@ -1,0 +1,21 @@
+85.6735  75.3211  4.6294  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 85.1020  71.6514  4.6182  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 85.7143  74.7706  4.6315  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 85.5102  68.0734  4.6214  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 87.3878  68.8073  4.6487  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 87.1837  75.7798  4.6389  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 86.8571  76.9725  4.6230  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 86.4490  71.7431  4.6128  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 85.9592  69.8165  4.6341  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 84.6939  72.6606  4.6248  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 86.0000  70.0917  4.6315  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 86.4490  73.5780  4.6206  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 86.0816  72.5688  4.6626  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 84.9388  68.9908  4.6395  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 85.0612  70.6422  4.6402  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 86.4082  71.3762  4.6195  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 85.8367  71.2844  4.6224  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 85.7143  73.7615  4.6277  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 85.0204  71.1927  4.6218  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 87.0612  74.4037  4.6442  0.0000   Surrogate_PSO Gradient_Prob: 0.25 
+ 

@@ -1,0 +1,20 @@
+89.1429  73.2110  0.7670   PSO Gradient_Prob: 0.25 
+ 89.1020  73.8532  0.7682   PSO Gradient_Prob: 0.25 
+ 89.3878  75.0459  0.7626   PSO Gradient_Prob: 0.25 
+ 90.0000  74.8624  0.7596   PSO Gradient_Prob: 0.25 
+ 89.3878  75.2294  0.7669   PSO Gradient_Prob: 0.25 
+ 88.9796  72.4771  0.7614   PSO Gradient_Prob: 0.25 
+ 88.8572  73.5780  0.7750   PSO Gradient_Prob: 0.25 
+ 90.1225  73.6697  0.7633   PSO Gradient_Prob: 0.25 
+ 88.4490  74.0367  0.7639   PSO Gradient_Prob: 0.25 
+ 88.6939  72.6605  0.7745   PSO Gradient_Prob: 0.25 
+ 89.7959  73.8532  0.7793   PSO Gradient_Prob: 0.25 
+ 89.9592  77.5229  0.7712   PSO Gradient_Prob: 0.25 
+ 90.5714  74.2202  0.7673   PSO Gradient_Prob: 0.25 
+ 89.6326  71.3762  0.7710   PSO Gradient_Prob: 0.25 
+ 89.8775  72.9358  0.7883   PSO Gradient_Prob: 0.25 
+ 89.5918  73.6697  0.7790   PSO Gradient_Prob: 0.25 
+ 88.8163  72.7523  0.7620   PSO Gradient_Prob: 0.25 
+ 90.0408  73.2110  0.7793   PSO Gradient_Prob: 0.25 
+ 87.7551  72.3853  0.7720   PSO Gradient_Prob: 0.25 
+ 90.0000  74.2202  0.7608   PSO Gradient_Prob: 0.25 

@@ -1,0 +1,5 @@
+0.0855   0.0968   0.5029    Benchmark: adam 
+ 0.0717   0.0936   0.4906    Benchmark: adam 
+ 0.0737   0.0901   0.5038    Benchmark: adam 
+ 0.0637   0.1128   0.4864    Benchmark: adam 
+ 0.0657   0.1016   0.4853    Benchmark: adam 

@@ -1,0 +1,12 @@
+75.4069  76.7920  29.0313   PSO Gradient_Prob: 0.0 
+ 75.6100  75.7906  28.8376   PSO Gradient_Prob: 0.0 
+ 74.7126  75.2387  29.0138   PSO Gradient_Prob: 0.0 
+ 75.4188  77.2630  28.4251   PSO Gradient_Prob: 0.0 
+ 75.8474  76.1479  28.3285   PSO Gradient_Prob: 0.0 
+ 74.7678  74.7587  28.7209   PSO Gradient_Prob: 0.0 
+ 75.7115  76.3927  28.2797   PSO Gradient_Prob: 0.0 
+ 75.4502  75.7808  29.3273   PSO Gradient_Prob: 0.0 
+ 75.1904  74.8000  28.5669   PSO Gradient_Prob: 0.0 
+ 74.7081  74.5954  28.5124   PSO Gradient_Prob: 0.0 
+ 
+ 
