@@ -1,0 +1,20 @@
+0.9269   0.9252   1.3697    Benchmark: sgd 
+ 0.9330   0.9299   1.2429    Benchmark: sgd 
+ 0.9327   0.9294   1.3632    Benchmark: sgd 
+ 0.9333   0.9290   1.3215    Benchmark: sgd 
+ 0.9306   0.9292   1.3403    Benchmark: sgd 
+ 0.9334   0.9286   1.3560    Benchmark: sgd 
+ 0.9264   0.9226   1.2195    Benchmark: sgd 
+ 0.9368   0.9335   1.3013    Benchmark: sgd 
+ 0.9182   0.9153   1.3042    Benchmark: sgd 
+ 0.9269   0.9237   1.3300    Benchmark: sgd 
+ 0.9232   0.9185   1.3271    Benchmark: sgd 
+ 0.9253   0.9192   1.2693    Benchmark: sgd 
+ 0.9284   0.9260   1.3691    Benchmark: sgd 
+ 0.9294   0.9241   1.3226    Benchmark: sgd 
+ 0.9204   0.9157   1.3178    Benchmark: sgd 
+ 0.9249   0.9205   1.3190    Benchmark: sgd 
+ 0.9284   0.9255   1.2661    Benchmark: sgd 
+ 0.9314   0.9281   1.3031    Benchmark: sgd 
+ 0.9340   0.9294   1.3572    Benchmark: sgd 
+ 0.9312   0.9286   1.3538    Benchmark: sgd 
