@@ -107,24 +107,24 @@ class Model(nn.Module):
     # Sequence of execution for the model layers
     
     def forward(self, x):
-        print("Stage1:",x.shape)
+        #print("Stage1:",x.shape)
         x = F.relu(self.conv1(x))
-        print("Stage2:",x.shape)
+        #print("Stage2:",x.shape)
         x = self.pool(x)
-        print("Stage3:",x.shape)
+        #print("Stage3:",x.shape)
         x = F.relu(self.conv2(x))
-        print("Stage4:",x.shape)
+        #print("Stage4:",x.shape)
         x = self.pool(x)
-        print("Stage5:",x.shape)
+        #print("Stage5:",x.shape)
         x = torch.flatten(x, 1)
-        print("Stage6:",x.shape)
+        #print("Stage6:",x.shape)
         x = F.relu(x)
         x = self.fc1(x)
-        print("Stage7:",x.shape)
+        #print("Stage7:",x.shape)
         x = F.relu(x)
         x = self.fc2(x)        
-        print("Stage8:",x.shape)
-        interr
+        #print("Stage8:",x.shape)
+        #interr
         return x
     # Used to apply softmax and obtain loss value
 
